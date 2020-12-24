@@ -35,7 +35,10 @@ const Authors = (props) => {
         </tbody>
       </table>
       <h1>Hello</h1>
-      <EditAuthor authors={result.data.allAuthors.map((a) => a.name)} />
+      <EditAuthor
+        setError={props.notify}
+        authors={result.data.allAuthors.map((a) => a.name)}
+      />
       <A />
     </div>
   )

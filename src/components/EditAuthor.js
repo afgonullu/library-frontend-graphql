@@ -1,5 +1,5 @@
 import React, { useState } from "react"
-import { useMutation, useQuery } from "@apollo/client"
+import { useMutation } from "@apollo/client"
 import Select from "react-select"
 import { EDIT_AUTHOR, ALL_AUTHORS } from "../queries"
 
@@ -10,11 +10,12 @@ const EditAuthor = (props) => {
   const [born, setBorn] = useState(1900)
   const [selectedOption, setSelectedOption] = useState(options[0])
 
-  const author = useQuery(ALL_AUTHORS)
-
   console.log(options)
 
   const [editAuthor] = useMutation(EDIT_AUTHOR, {
+    onError: (error) => {
+      props.setError(error.graphQLErrors[0].message)
+    },
     refetchQueries: [{ query: ALL_AUTHORS }],
   })
 
