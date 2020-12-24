@@ -10,7 +10,7 @@ const EditAuthor = (props) => {
   const [born, setBorn] = useState(1900)
   const [selectedOption, setSelectedOption] = useState(options[0])
 
-  console.log(options)
+  // console.log(options)
 
   const [editAuthor] = useMutation(EDIT_AUTHOR, {
     onError: (error) => {
@@ -21,7 +21,7 @@ const EditAuthor = (props) => {
 
   const submit = async (event) => {
     event.preventDefault()
-    console.log(selectedOption)
+    // console.log(selectedOption)
 
     editAuthor({ variables: { name: selectedOption.value, year: born } })
 

@@ -57,7 +57,7 @@ const Books = (props) => {
           <button
             key={g}
             onClick={() => {
-              console.log(g)
+              // console.log(g)
               setFilter(g)
             }}
           >

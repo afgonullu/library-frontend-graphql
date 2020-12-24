@@ -1,11 +1,20 @@
 import React, { useState } from "react"
-import { useApolloClient, useLazyQuery, useQuery } from "@apollo/client"
+import { gql, useApolloClient, useSubscription } from "@apollo/client"
 import Authors from "./components/Authors"
 import Books from "./components/Books"
 import NewBook from "./components/NewBook"
 import LoginForm from "./components/LoginForm"
-import { GET_USER } from "./queries"
+import { BOOK_DETAILS, ALL_BOOKS } from "./queries"
 import Recommend from "./components/Recommend"
+
+export const BOOK_ADDED = gql`
+  subscription {
+    bookAdded {
+      ...BookDetails
+    }
+  }
+  ${BOOK_DETAILS}
+`
 
 const Notify = ({ errorMessage }) => {
   if (!errorMessage) {
@@ -22,6 +31,38 @@ const App = () => {
   const [errorMessage, setErrorMessage] = useState(null)
 
   const client = useApolloClient()
+  console.log(client)
+
+  const updateCacheWith = (addedBook) => {
+    const includedIn = (set, object) => set.map((p) => p.id).includes(object.id)
+
+    console.log(client)
+
+    const dataInStore = client.readQuery({
+      query: ALL_BOOKS,
+      variables: {
+        genre: null,
+      },
+    })
+    if (!includedIn(dataInStore.allBooks, addedBook)) {
+      client.writeQuery({
+        query: ALL_BOOKS,
+        variables: {
+          genre: null,
+        },
+        data: { allBooks: dataInStore.allBooks.concat(addedBook) },
+      })
+    }
+  }
+
+  useSubscription(BOOK_ADDED, {
+    onSubscriptionData: ({ subscriptionData }) => {
+      const addedBook = subscriptionData.data.bookAdded
+      console.log("sub", addedBook)
+      notify(`${addedBook.title} added`)
+      updateCacheWith(addedBook)
+    },
+  })
 
   const notify = (message) => {
     setErrorMessage(message)
@@ -36,7 +77,7 @@ const App = () => {
     client.resetStore()
   }
 
-  console.log(token)
+  // console.log(token)
   if (!token) {
     return (
       <div>
@@ -67,7 +108,12 @@ const App = () => {
       <Books show={page === "books"} />
       <Recommend favGenre={favGenre} show={page === "recommend"} />
 
-      <NewBook setError={notify} show={page === "add"} setPage={setPage} />
+      <NewBook
+        updateCacheWith={updateCacheWith}
+        setError={notify}
+        show={page === "add"}
+        setPage={setPage}
+      />
     </div>
   )
 }

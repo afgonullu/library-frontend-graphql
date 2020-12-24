@@ -16,7 +16,7 @@ const LoginForm = ({ setError, setToken, setFavGenre }) => {
 
   useEffect(() => {
     if (result.data) {
-      console.log(result.data)
+      // console.log(result.data)
       const token = result.data.login.value
       setToken(token)
       if (data.me) {
